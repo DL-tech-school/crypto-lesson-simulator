@@ -1,137 +1,680 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Crypto Quest — симулятор портфеля</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Quest — симулятор портфеля</title>
+  <style>
+    :root {
+      --bg: #0f1226;
+      --panel: rgba(255,255,255,0.08);
+      --panel-strong: rgba(255,255,255,0.14);
+      --text: #f5f7ff;
+      --muted: #b9c0e0;
+      --accent: #7c5cff;
+      --green: #2ecc71;
+      --red: #ff5d73;
+      --yellow: #ffd166;
+      --blue: #4cc9f0;
+      --pink: #ff77c8;
+      --shadow: 0 16px 40px rgba(0,0,0,0.25);
+      --radius: 22px;
+    }
 
-<style>
-:root{
---bg:#0f1226;--panel:rgba(255,255,255,0.08);--text:#f5f7ff;
---muted:#b9c0e0;--accent:#7c5cff;--green:#2ecc71;
---red:#ff5d73;--yellow:#ffd166;--blue:#4cc9f0;--pink:#ff77c8;
---shadow:0 16px 40px rgba(0,0,0,0.25);--radius:22px;
-}
-*{box-sizing:border-box;}
-body{margin:0;font-family:Inter;background:linear-gradient(180deg,#11152d,#0b0e20);color:var(--text);}
-.wrap{max-width:1180px;margin:auto;padding:24px;}
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(124,92,255,0.35), transparent 28%),
+        radial-gradient(circle at top right, rgba(76,201,240,0.18), transparent 25%),
+        linear-gradient(180deg, #11152d 0%, #0b0e20 100%);
+      color: var(--text);
+      min-height: 100vh;
+    }
 
-.panel{background:var(--panel);border-radius:var(--radius);padding:20px;}
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 24px;
+    }
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
+    .hero {
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 18px;
+      align-items: stretch;
+      margin-bottom: 18px;
+    }
 
-.coin-card{padding:20px;}
-.coin-name{font-size:20px;font-weight:800;}
-.label{font-size:13px;color:var(--muted);}
-.value{font-weight:700;}
-input,select{width:100%;padding:10px;border-radius:10px;border:none;background:#222;color:white;}
+    .panel {
+      background: var(--panel);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: var(--radius);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
 
-button{padding:12px;border:none;border-radius:12px;font-weight:700;cursor:pointer;}
-.primary{background:#7c5cff;color:white;}
-.secondary{background:#333;color:white;}
+    .hero-main {
+      padding: 24px;
+    }
 
-.result-line{display:flex;justify-content:space-between;padding:8px 0;}
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,92,255,0.16);
+      color: #e9e2ff;
+      border: 1px solid rgba(124,92,255,0.35);
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
 
-</style>
+    h1 {
+      margin: 0 0 10px;
+      font-size: 40px;
+      line-height: 1.05;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      max-width: 700px;
+      margin-bottom: 18px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    button, .button-like {
+      border: none;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, opacity 0.15s ease, background 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+    button:active { transform: translateY(0); }
+
+    .primary {
+      background: linear-gradient(135deg, #8b6dff, #7c5cff);
+      color: white;
+    }
+
+    .secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .hero-side {
+      padding: 20px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+    }
+
+    .stat {
+      background: rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .coin-card {
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .coin-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -40px auto;
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.06);
+      filter: blur(8px);
+    }
+
+    .coin-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .coin-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .coin-emoji {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.12);
+      font-size: 21px;
+    }
+
+    .coin-type {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin: 8px 0;
+      align-items: center;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .value {
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 12px 13px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.08)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 12px center / 16px;
+      padding-right: 40px;
+    }
+
+    select option {
+      background: #1a1f3d;
+      color: #ffffff;
+    }
+
+    input::placeholder { color: #a9b1d7; }
+
+    .coin-card.safe { outline: 1px solid rgba(255, 209, 102, 0.22); }
+    .coin-card.trend { outline: 1px solid rgba(76, 201, 240, 0.22); }
+    .coin-card.risky { outline: 1px solid rgba(255, 119, 200, 0.22); }
+
+    .sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .section {
+      padding: 20px;
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+
+    .section p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .three {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .profit { color: var(--green); }
+    .loss { color: var(--red); }
+
+    .result-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 15px;
+    }
+
+    .result-line:last-child { border-bottom: 0; }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 980px) {
+      .hero, .sections, .grid, .three {
+        grid-template-columns: 1fr;
+      }
+
+      h1 { font-size: 32px; }
+    }
+  </style>
 </head>
-
 <body>
-<div class="wrap">
+  <div class="wrap">
+    <div class="hero">
+      <div class="panel hero-main">
+        <div class="badge">🚀 Crypto Quest • міні-симулятор для уроку</div>
+        <h1>Спробуй себе в ролі<br>криптоінвестора</h1>
+        <div class="sub">
+          Тобі доступно <strong>$1000</strong>. Розподіли кошти між трьома монетами, застосовуй зміни ринку,
+          перекидай гроші між валютами та слідкуй, як змінюється твій портфель.
+        </div>
+        <div class="actions">
+          <button class="primary" id="startBtn">Почати гру</button>
+          <button class="secondary" id="resetBtn">Скинути прогрес</button>
+        </div>
+        <div class="pill">🔒 Без входу • 🧠 Дані зберігаються лише у цій вкладці</div>
+      </div>
 
-<h1>Crypto Quest</h1>
-<p>Розподіли $1000 між монетами та дивись результат</p>
+      <div class="panel hero-side">
+        <div class="stat">
+          <div class="stat-label">Стартовий баланс</div>
+          <div class="stat-value">$1000</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Поточна вартість портфеля</div>
+          <div class="stat-value" id="portfolioValue">$0.00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Результат</div>
+          <div class="stat-value" id="profitValue">$0.00</div>
+        </div>
+      </div>
+    </div>
 
-<div class="grid">
+    <div class="grid">
+      <div class="panel coin-card safe">
+        <div class="coin-head">
+          <div>
+            <div class="coin-name"><span class="coin-emoji">🟡</span> NovaBit</div>
+            <div class="coin-type">Більш спокійна монета для обережної стратегії. Зазвичай змінюється плавніше й без різких стрибків.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="safeInput">Скільки вкласти, $</label>
+          <input type="number" id="safeInput" min="0" step="1" placeholder="Наприклад, 300">
+        </div>
+        <div class="row"><div class="label">Поточна сума</div><div class="value" id="safeCurrent">$0.00</div></div>
+        <div class="row"><div class="label">Зміна за раунд</div><div class="value" id="safeChange">0%</div></div>
+      </div>
 
-<div class="panel coin-card">
-<div class="coin-name">🟡 NovaBit</div>
-<input id="safeInput" type="number" placeholder="Сума">
-<div class="value" id="safeCurrent">$0</div>
-</div>
+      <div class="panel coin-card trend">
+        <div class="coin-head">
+          <div>
+            <div class="coin-name"><span class="coin-emoji">🔵</span> PulseX</div>
+            <div class="coin-type">Монета, яка сильно реагує на тренди, соцмережі й гучні новини. Може швидко рости, якщо навколо неї хайп.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="trendInput">Скільки вкласти, $</label>
+          <input type="number" id="trendInput" min="0" step="1" placeholder="Наприклад, 400">
+        </div>
+        <div class="row"><div class="label">Поточна сума</div><div class="value" id="trendCurrent">$0.00</div></div>
+        <div class="row"><div class="label">Зміна за раунд</div><div class="value" id="trendChange">0%</div></div>
+      </div>
 
-<div class="panel coin-card">
-<div class="coin-name">🔵 PulseX</div>
-<input id="trendInput" type="number" placeholder="Сума">
-<div class="value" id="trendCurrent">$0</div>
-</div>
+      <div class="panel coin-card risky">
+        <div class="coin-head">
+          <div>
+            <div class="coin-name"><span class="coin-emoji">🔴</span> VoltEdge</div>
+            <div class="coin-type">Найризикованіша монета. Тут можливі і великі прибутки, і різкі просідання буквально після однієї події.</div>
+          </div>
+        </div>
+        <div class="field">
+          <label for="riskyInput">Скільки вкласти, $</label>
+          <input type="number" id="riskyInput" min="0" step="1" placeholder="Наприклад, 300">
+        </div>
+        <div class="row"><div class="label">Поточна сума</div><div class="value" id="riskyCurrent">$0.00</div></div>
+        <div class="row"><div class="label">Зміна за раунд</div><div class="value" id="riskyChange">0%</div></div>
+      </div>
+    </div>
 
-<div class="panel coin-card">
-<div class="coin-name">🔴 VoltEdge</div>
-<input id="riskyInput" type="number" placeholder="Сума">
-<div class="value" id="riskyCurrent">$0</div>
-</div>
+    <div class="sections">
+      <div class="panel section">
+        <h2>📈 Застосувати подію ринку</h2>
+        <p>Викладач озвучує новину, а ти вводиш зміну у відсотках для кожної монети. Наприклад: <strong>+10</strong> або <strong>-15</strong>.</p>
+        <div class="three">
+          <div class="field">
+            <label for="safePercent">SafeCoin, %</label>
+            <input type="number" id="safePercent" step="0.1" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="trendPercent">TrendCoin, %</label>
+            <input type="number" id="trendPercent" step="0.1" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="riskyPercent">RiskyCoin, %</label>
+            <input type="number" id="riskyPercent" step="0.1" placeholder="0">
+          </div>
+        </div>
+        <button class="primary" id="applyEventBtn">Застосувати зміни</button>
+      </div>
 
-</div>
+      <div class="panel section">
+        <h2>🔄 Перекинути кошти</h2>
+        <p>Можна перекинути частину грошей з однієї монети в іншу після новини або за власною стратегією.</p>
+        <div class="three">
+          <div class="field">
+            <label for="fromCoin">З якої монети</label>
+            <select id="fromCoin">
+              <option value="safe">NovaBit</option>
+              <option value="trend">PulseX</option>
+              <option value="risky">VoltEdge</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="toCoin">У яку монету</label>
+            <select id="toCoin">
+              <option value="trend">PulseX</option>
+              <option value="safe">NovaBit</option>
+              <option value="risky">VoltEdge</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="transferAmount">Сума, $</label>
+            <input type="number" id="transferAmount" min="0" step="1" placeholder="100">
+          </div>
+        </div>
+        <button class="primary" id="transferBtn">Перекинути кошти</button>
+      </div>
+    </div>
 
-<div class="panel">
+    <div class="panel section" style="margin-top:18px;">
+      <h2>📊 Підсумок</h2>
+      <p>Тут одразу видно, скільки зараз коштує твій портфель і яка монета спрацювала найкраще.</p>
+      <div class="result-line"><span>NovaBit</span><strong id="sumSafe">$0.00</strong></div>
+      <div class="result-line"><span>PulseX</span><strong id="sumTrend">$0.00</strong></div>
+      <div class="result-line"><span>VoltEdge</span><strong id="sumRisky">$0.00</strong></div>
+      <div class="result-line"><span>Загальна вартість портфеля</span><strong id="sumPortfolio">$0.00</strong></div>
+      <div class="result-line"><span>Прибуток / збиток</span><strong id="sumProfit">$0.00</strong></div>
+      <div class="result-line"><span>Вільний залишок для розподілу</span><strong id="cashLeft">$1000.00</strong></div>
+    </div>
 
-<h3>📈 Подія ринку</h3>
+    <div class="footer-note">
+      Порада: викладач може просто надсилати це посилання групі. Кожен учень працює незалежно у своїй вкладці.
+    </div>
+  </div>
 
-<label>NovaBit, %</label>
-<input id="safePercent" type="number">
+  <script>
+    const KEY = 'cryptoQuestSessionState';
+    const START_BALANCE = 1000;
 
-<label>PulseX, %</label>
-<input id="trendPercent" type="number">
+    const defaultState = () => ({
+      started: false,
+      coins: {
+        safe: { invested: 0, current: 0, lastChange: 0 },
+        trend: { invested: 0, current: 0, lastChange: 0 },
+        risky: { invested: 0, current: 0, lastChange: 0 }
+      }
+    });
 
-<label>VoltEdge, %</label>
-<input id="riskyPercent" type="number">
+    let state = loadState();
 
-<button class="primary" onclick="apply()">Застосувати</button>
+    function loadState() {
+      const raw = sessionStorage.getItem(KEY);
+      if (!raw) return defaultState();
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return defaultState();
+      }
+    }
 
-</div>
+    function saveState() {
+      sessionStorage.setItem(KEY, JSON.stringify(state));
+    }
 
-<div class="panel">
+    function formatMoney(n) {
+      return `$${Number(n).toFixed(2)}`;
+    }
 
-<h3>📊 Результат</h3>
+    function totalInvested() {
+      return state.coins.safe.invested + state.coins.trend.invested + state.coins.risky.invested;
+    }
 
-<div class="result-line"><span>NovaBit</span><span id="sumSafe">$0</span></div>
-<div class="result-line"><span>PulseX</span><span id="sumTrend">$0</span></div>
-<div class="result-line"><span>VoltEdge</span><span id="sumRisky">$0</span></div>
+    function totalCurrent() {
+      return state.coins.safe.current + state.coins.trend.current + state.coins.risky.current;
+    }
 
-<div class="result-line"><b>Разом</b><b id="total">$0</b></div>
+    function cashRemaining() {
+      return START_BALANCE - totalInvested();
+    }
 
-</div>
+    function updateAllocationFromInputs() {
+      const safe = Math.max(0, Number(document.getElementById('safeInput').value || 0));
+      const trend = Math.max(0, Number(document.getElementById('trendInput').value || 0));
+      const risky = Math.max(0, Number(document.getElementById('riskyInput').value || 0));
+      const sum = safe + trend + risky;
 
-</div>
+      if (sum > START_BALANCE) {
+        alert('Ти не можеш розподілити більше ніж $1000.');
+        syncInputs();
+        return;
+      }
 
-<script>
+      state.coins.safe.invested = safe;
+      state.coins.trend.invested = trend;
+      state.coins.risky.invested = risky;
 
-let safe=0,trend=0,risky=0;
+      if (!state.started) {
+        state.coins.safe.current = safe;
+        state.coins.trend.current = trend;
+        state.coins.risky.current = risky;
+      }
 
-function apply(){
+      saveState();
+      render();
+    }
 
-safe+=safe*(document.getElementById("safePercent").value||0)/100;
-trend+=trend*(document.getElementById("trendPercent").value||0)/100;
-risky+=risky*(document.getElementById("riskyPercent").value||0)/100;
+    function syncInputs() {
+      document.getElementById('safeInput').value = state.coins.safe.invested || '';
+      document.getElementById('trendInput').value = state.coins.trend.invested || '';
+      document.getElementById('riskyInput').value = state.coins.risky.invested || '';
+    }
 
-update();
-}
+    function startGame() {
+      const invested = totalInvested();
+      if (invested <= 0) {
+        alert('Спочатку розподіли хоча б частину коштів між монетами.');
+        return;
+      }
 
-document.getElementById("safeInput").oninput=e=>{
-safe=+e.target.value||0;update();
-}
-document.getElementById("trendInput").oninput=e=>{
-trend=+e.target.value||0;update();
-}
-document.getElementById("riskyInput").oninput=e=>{
-risky=+e.target.value||0;update();
-}
+      state.started = true;
+      state.coins.safe.current = state.coins.safe.invested;
+      state.coins.trend.current = state.coins.trend.invested;
+      state.coins.risky.current = state.coins.risky.invested;
+      state.coins.safe.lastChange = 0;
+      state.coins.trend.lastChange = 0;
+      state.coins.risky.lastChange = 0;
+      saveState();
+      render();
+      alert('Гру розпочато! Тепер можна застосовувати події ринку.');
+    }
 
-function update(){
+    function applyEvent() {
+      if (!state.started) {
+        alert('Спочатку натисни “Почати гру”.');
+        return;
+      }
 
-document.getElementById("safeCurrent").innerText="$"+safe.toFixed(2);
-document.getElementById("trendCurrent").innerText="$"+trend.toFixed(2);
-document.getElementById("riskyCurrent").innerText="$"+risky.toFixed(2);
+      const safePct = Number(document.getElementById('safePercent').value || 0);
+      const trendPct = Number(document.getElementById('trendPercent').value || 0);
+      const riskyPct = Number(document.getElementById('riskyPercent').value || 0);
 
-document.getElementById("sumSafe").innerText="$"+safe.toFixed(2);
-document.getElementById("sumTrend").innerText="$"+trend.toFixed(2);
-document.getElementById("sumRisky").innerText="$"+risky.toFixed(2);
+      applyChange('safe', safePct);
+      applyChange('trend', trendPct);
+      applyChange('risky', riskyPct);
 
-document.getElementById("total").innerText="$"+(safe+trend+risky).toFixed(2);
+      document.getElementById('safePercent').value = '';
+      document.getElementById('trendPercent').value = '';
+      document.getElementById('riskyPercent').value = '';
 
-}
+      saveState();
+      render();
+    }
 
-</script>
+    function applyChange(coin, pct) {
+      state.coins[coin].current = state.coins[coin].current * (1 + pct / 100);
+      state.coins[coin].invested = state.coins[coin].current;
+      state.coins[coin].lastChange = pct;
+    }
 
+    function transferFunds() {
+      const from = document.getElementById('fromCoin').value;
+      const to = document.getElementById('toCoin').value;
+      const amount = Math.max(0, Number(document.getElementById('transferAmount').value || 0));
+
+      if (from === to) {
+        alert('Оберіть дві різні монети.');
+        return;
+      }
+      if (amount <= 0) {
+        alert('Введи суму для перекидання.');
+        return;
+      }
+      if (state.coins[from].current < amount) {
+        alert('Недостатньо коштів у вибраній монеті.');
+        return;
+      }
+
+      state.coins[from].current -= amount;
+      state.coins[to].current += amount;
+      state.coins[from].invested = state.coins[from].current;
+      state.coins[to].invested = state.coins[to].current;
+      saveState();
+      render();
+      document.getElementById('transferAmount').value = '';
+    }
+
+    function resetAll() {
+      state = defaultState();
+      sessionStorage.removeItem(KEY);
+      document.getElementById('safePercent').value = '';
+      document.getElementById('trendPercent').value = '';
+      document.getElementById('riskyPercent').value = '';
+      document.getElementById('transferAmount').value = '';
+      render();
+    }
+
+    function render() {
+      syncInputs();
+
+      document.getElementById('safeCurrent').textContent = formatMoney(state.coins.safe.current);
+      document.getElementById('trendCurrent').textContent = formatMoney(state.coins.trend.current);
+      document.getElementById('riskyCurrent').textContent = formatMoney(state.coins.risky.current);
+
+      document.getElementById('safeChange').textContent = `${state.coins.safe.lastChange || 0}%`;
+      document.getElementById('trendChange').textContent = `${state.coins.trend.lastChange || 0}%`;
+      document.getElementById('riskyChange').textContent = `${state.coins.risky.lastChange || 0}%`;
+
+      const portfolio = totalCurrent();
+      const profit = portfolio - totalInvested();
+
+      const profitEl = document.getElementById('profitValue');
+      profitEl.textContent = formatMoney(profit);
+      profitEl.className = 'stat-value ' + (profit >= 0 ? 'profit' : 'loss');
+
+      document.getElementById('portfolioValue').textContent = formatMoney(portfolio);
+      document.getElementById('sumSafe').textContent = formatMoney(state.coins.safe.current);
+      document.getElementById('sumTrend').textContent = formatMoney(state.coins.trend.current);
+      document.getElementById('sumRisky').textContent = formatMoney(state.coins.risky.current);
+      document.getElementById('sumPortfolio').textContent = formatMoney(portfolio);
+
+      const sumProfit = document.getElementById('sumProfit');
+      sumProfit.textContent = formatMoney(profit);
+      sumProfit.className = profit >= 0 ? 'profit' : 'loss';
+
+      document.getElementById('cashLeft').textContent = formatMoney(cashRemaining());
+
+      saveState();
+    }
+
+    document.getElementById('safeInput').addEventListener('input', updateAllocationFromInputs);
+    document.getElementById('trendInput').addEventListener('input', updateAllocationFromInputs);
+    document.getElementById('riskyInput').addEventListener('input', updateAllocationFromInputs);
+    document.getElementById('startBtn').addEventListener('click', startGame);
+    document.getElementById('applyEventBtn').addEventListener('click', applyEvent);
+    document.getElementById('transferBtn').addEventListener('click', transferFunds);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+    render();
+  </script>
 </body>
 </html>
