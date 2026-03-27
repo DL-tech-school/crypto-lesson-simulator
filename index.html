@@ -1,256 +1,136 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <title>Crypto Simulator</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crypto Quest — симулятор портфеля</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f1226;
-      color: #fff;
-      padding: 20px;
-    }
+<style>
+:root{
+--bg:#0f1226;--panel:rgba(255,255,255,0.08);--text:#f5f7ff;
+--muted:#b9c0e0;--accent:#7c5cff;--green:#2ecc71;
+--red:#ff5d73;--yellow:#ffd166;--blue:#4cc9f0;--pink:#ff77c8;
+--shadow:0 16px 40px rgba(0,0,0,0.25);--radius:22px;
+}
+*{box-sizing:border-box;}
+body{margin:0;font-family:Inter;background:linear-gradient(180deg,#11152d,#0b0e20);color:var(--text);}
+.wrap{max-width:1180px;margin:auto;padding:24px;}
 
-    h1 {
-      margin-bottom: 10px;
-    }
+.panel{background:var(--panel);border-radius:var(--radius);padding:20px;}
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-    }
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:16px;}
 
-    .card {
-      background: #1a1f3d;
-      padding: 20px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-    }
+.coin-card{padding:20px;}
+.coin-name{font-size:20px;font-weight:800;}
+.label{font-size:13px;color:var(--muted);}
+.value{font-weight:700;}
+input,select{width:100%;padding:10px;border-radius:10px;border:none;background:#222;color:white;}
 
-    .coins {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
+button{padding:12px;border:none;border-radius:12px;font-weight:700;cursor:pointer;}
+.primary{background:#7c5cff;color:white;}
+.secondary{background:#333;color:white;}
 
-    .coin {
-      flex: 1;
-      min-width: 250px;
-    }
+.result-line{display:flex;justify-content:space-between;padding:8px 0;}
 
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      margin-bottom: 10px;
-      border-radius: 10px;
-      border: none;
-      background: #2a2f5a;
-      color: #fff;
-    }
-
-    select option {
-      background: #1a1f3d;
-      color: #fff;
-    }
-
-    button {
-      padding: 12px 16px;
-      border: none;
-      border-radius: 12px;
-      background: #6c63ff;
-      color: #fff;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-
-    button:hover {
-      opacity: 0.9;
-    }
-
-    .row {
-      display: flex;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-
-    .result {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .negative {
-      color: #ff5a5a;
-    }
-
-    .positive {
-      color: #4cff9a;
-    }
-  </style>
+</style>
 </head>
 
 <body>
-<div class="container">
+<div class="wrap">
 
-  <h1>Спробуй себе в ролі криптоінвестора</h1>
+<h1>Crypto Quest</h1>
+<p>Розподіли $1000 між монетами та дивись результат</p>
 
-  <div class="card">
-    💰 Баланс: <strong>$1000</strong><br>
-    Поточна вартість портфеля:
-    <div id="total">$1000</div>
-    <div id="profit"></div>
-  </div>
+<div class="grid">
 
-  <div class="coins">
+<div class="panel coin-card">
+<div class="coin-name">🟡 NovaBit</div>
+<input id="safeInput" type="number" placeholder="Сума">
+<div class="value" id="safeCurrent">$0</div>
+</div>
 
-    <div class="card coin">
-      <h3>🟡 NovaBit</h3>
-      <p>Більш стабільна монета для обережної стратегії.</p>
-      Скільки вкласти:
-      <input id="safe" type="number" value="0">
-      Поточна сума: <span id="safeNow">$0</span><br>
-      Зміна: <span id="safeChange">0%</span>
-    </div>
+<div class="panel coin-card">
+<div class="coin-name">🔵 PulseX</div>
+<input id="trendInput" type="number" placeholder="Сума">
+<div class="value" id="trendCurrent">$0</div>
+</div>
 
-    <div class="card coin">
-      <h3>🔵 PulseX</h3>
-      <p>Залежить від трендів і новин.</p>
-      Скільки вкласти:
-      <input id="trend" type="number" value="0">
-      Поточна сума: <span id="trendNow">$0</span><br>
-      Зміна: <span id="trendChange">0%</span>
-    </div>
+<div class="panel coin-card">
+<div class="coin-name">🔴 VoltEdge</div>
+<input id="riskyInput" type="number" placeholder="Сума">
+<div class="value" id="riskyCurrent">$0</div>
+</div>
 
-    <div class="card coin">
-      <h3>🔴 VoltEdge</h3>
-      <p>Ризикована монета з великими коливаннями.</p>
-      Скільки вкласти:
-      <input id="risky" type="number" value="0">
-      Поточна сума: <span id="riskyNow">$0</span><br>
-      Зміна: <span id="riskyChange">0%</span>
-    </div>
+</div>
 
-  </div>
+<div class="panel">
 
-  <button onclick="startGame()">Почати гру</button>
+<h3>📈 Подія ринку</h3>
 
-  <div class="card">
-    <h3>Застосувати подію ринку</h3>
+<label>NovaBit, %</label>
+<input id="safePercent" type="number">
 
-    NovaBit, %
-    <input id="safePercent" type="number" value="0">
+<label>PulseX, %</label>
+<input id="trendPercent" type="number">
 
-    PulseX, %
-    <input id="trendPercent" type="number" value="0">
+<label>VoltEdge, %</label>
+<input id="riskyPercent" type="number">
 
-    VoltEdge, %
-    <input id="riskyPercent" type="number" value="0">
+<button class="primary" onclick="apply()">Застосувати</button>
 
-    <button onclick="applyChanges()">Застосувати зміни</button>
-  </div>
+</div>
 
-  <div class="card">
-    <h3>Перекинути кошти</h3>
+<div class="panel">
 
-    З якої:
-    <select id="from">
-      <option value="safe">NovaBit</option>
-      <option value="trend">PulseX</option>
-      <option value="risky">VoltEdge</option>
-    </select>
+<h3>📊 Результат</h3>
 
-    В яку:
-    <select id="to">
-      <option value="safe">NovaBit</option>
-      <option value="trend">PulseX</option>
-      <option value="risky">VoltEdge</option>
-    </select>
+<div class="result-line"><span>NovaBit</span><span id="sumSafe">$0</span></div>
+<div class="result-line"><span>PulseX</span><span id="sumTrend">$0</span></div>
+<div class="result-line"><span>VoltEdge</span><span id="sumRisky">$0</span></div>
 
-    Сума:
-    <input id="amount" type="number" value="0">
+<div class="result-line"><b>Разом</b><b id="total">$0</b></div>
 
-    <button onclick="transfer()">Перекинути</button>
-  </div>
+</div>
 
 </div>
 
 <script>
-let state = {
-  safe: 0,
-  trend: 0,
-  risky: 0,
-  total: 1000
-};
 
-function startGame() {
-  state.safe = +document.getElementById("safe").value;
-  state.trend = +document.getElementById("trend").value;
-  state.risky = +document.getElementById("risky").value;
+let safe=0,trend=0,risky=0;
 
-  update();
+function apply(){
+
+safe+=safe*(document.getElementById("safePercent").value||0)/100;
+trend+=trend*(document.getElementById("trendPercent").value||0)/100;
+risky+=risky*(document.getElementById("riskyPercent").value||0)/100;
+
+update();
 }
 
-function applyChanges() {
-  let s = +document.getElementById("safePercent").value;
-  let t = +document.getElementById("trendPercent").value;
-  let r = +document.getElementById("riskyPercent").value;
-
-  state.safe *= (1 + s / 100);
-  state.trend *= (1 + t / 100);
-  state.risky *= (1 + r / 100);
-
-  document.getElementById("safe").value = state.safe.toFixed(2);
-  document.getElementById("trend").value = state.trend.toFixed(2);
-  document.getElementById("risky").value = state.risky.toFixed(2);
-
-  document.getElementById("safeChange").innerText = s + "%";
-  document.getElementById("trendChange").innerText = t + "%";
-  document.getElementById("riskyChange").innerText = r + "%";
-
-  update();
+document.getElementById("safeInput").oninput=e=>{
+safe=+e.target.value||0;update();
+}
+document.getElementById("trendInput").oninput=e=>{
+trend=+e.target.value||0;update();
+}
+document.getElementById("riskyInput").oninput=e=>{
+risky=+e.target.value||0;update();
 }
 
-function transfer() {
-  let from = document.getElementById("from").value;
-  let to = document.getElementById("to").value;
-  let amount = +document.getElementById("amount").value;
+function update(){
 
-  if (from === to) return;
+document.getElementById("safeCurrent").innerText="$"+safe.toFixed(2);
+document.getElementById("trendCurrent").innerText="$"+trend.toFixed(2);
+document.getElementById("riskyCurrent").innerText="$"+risky.toFixed(2);
 
-  if (state[from] >= amount) {
-    state[from] -= amount;
-    state[to] += amount;
-  }
+document.getElementById("sumSafe").innerText="$"+safe.toFixed(2);
+document.getElementById("sumTrend").innerText="$"+trend.toFixed(2);
+document.getElementById("sumRisky").innerText="$"+risky.toFixed(2);
 
-  document.getElementById("safe").value = state.safe.toFixed(2);
-  document.getElementById("trend").value = state.trend.toFixed(2);
-  document.getElementById("risky").value = state.risky.toFixed(2);
+document.getElementById("total").innerText="$"+(safe+trend+risky).toFixed(2);
 
-  update();
 }
 
-function update() {
-  let total = state.safe + state.trend + state.risky;
-  let profit = total - 1000;
-
-  document.getElementById("safeNow").innerText = "$" + state.safe.toFixed(2);
-  document.getElementById("trendNow").innerText = "$" + state.trend.toFixed(2);
-  document.getElementById("riskyNow").innerText = "$" + state.risky.toFixed(2);
-
-  document.getElementById("total").innerText = "$" + total.toFixed(2);
-
-  let profitEl = document.getElementById("profit");
-  profitEl.innerText = profit.toFixed(2);
-
-  if (profit > 0) {
-    profitEl.className = "positive";
-  } else {
-    profitEl.className = "negative";
-  }
-}
 </script>
 
 </body>
