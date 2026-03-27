@@ -591,38 +591,35 @@
     }
 
     function applyChange(coin, pct) {
-      state.coins[coin].current = state.coins[coin].current * (1 + pct / 100);
-      state.coins[coin].invested = state.coins[coin].current;
-      state.coins[coin].lastChange = pct;
-    }
+  state.coins[coin].current = state.coins[coin].current * (1 + pct / 100);
+  state.coins[coin].lastChange = pct;
+}
 
-    function transferFunds() {
-      const from = document.getElementById('fromCoin').value;
-      const to = document.getElementById('toCoin').value;
-      const amount = Math.max(0, Number(document.getElementById('transferAmount').value || 0));
+   function transferFunds() {
+  const from = document.getElementById('fromCoin').value;
+  const to = document.getElementById('toCoin').value;
+  const amount = Math.max(0, Number(document.getElementById('transferAmount').value || 0));
 
-      if (from === to) {
-        alert('Оберіть дві різні монети.');
-        return;
-      }
-      if (amount <= 0) {
-        alert('Введи суму для перекидання.');
-        return;
-      }
-      if (state.coins[from].current < amount) {
-        alert('Недостатньо коштів у вибраній монеті.');
-        return;
-      }
+  if (from === to) {
+    alert('Оберіть дві різні монети.');
+    return;
+  }
+  if (amount <= 0) {
+    alert('Введи суму для перекидання.');
+    return;
+  }
+  if (state.coins[from].current < amount) {
+    alert('Недостатньо коштів у вибраній монеті.');
+    return;
+  }
 
-      state.coins[from].current -= amount;
-      state.coins[to].current += amount;
-      state.coins[from].invested = state.coins[from].current;
-      state.coins[to].invested = state.coins[to].current;
-      saveState();
-      render();
-      document.getElementById('transferAmount').value = '';
-    }
+  state.coins[from].current -= amount;
+  state.coins[to].current += amount;
 
+  saveState();
+  render();
+  document.getElementById('transferAmount').value = '';
+}
     function resetAll() {
       state = defaultState();
       sessionStorage.removeItem(KEY);
